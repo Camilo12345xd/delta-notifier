@@ -1,0 +1,34 @@
+name: Check Delta Version
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # Cada 2 horas
+  workflow_dispatch:        # Permite ejecutarlo manualmente
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run checker
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.AAFqOC62p7orgfSNIOAgTD0MoMKMY9MsJgo }}
+          CHAT_ID: ${{ secrets.9044383382 }}
+        run: python checker.py
+
+      - name: Commit updated version
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add last_version.txt || true
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update last version" && git push)
